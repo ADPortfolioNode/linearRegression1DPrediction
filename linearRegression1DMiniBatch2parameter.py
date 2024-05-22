@@ -9,7 +9,8 @@ from mpl_toolkits import mplot3d
 class plot_error_surfaces(object):
     
     # Constructor
-    def __init__(self, w_range, b_range, X, Y, n_samples = 30, go = True):
+    #go true will plot the 3D plot go false will not plot the 3D plot
+    def __init__(self, w_range, b_range, X, Y, n_samples = 30, go = False):
         W = np.linspace(-w_range, w_range, n_samples)
         B = np.linspace(-b_range, b_range, n_samples)
         w, b = np.meshgrid(W, B)    
@@ -253,10 +254,45 @@ train_model_Mini5(10)
 #mini batch gradient descent method batch = 10 ##############################
 # Create a plot_error_surfaces object.
 
-get_surface = plot_error_surfaces(15, 13, X, Y, 30, go = False)
+get_surface = plot_error_surfaces(15, 13, X, Y, 30, go = False) 
 print("creating plot_error_surfaces object")
 
-#mini batch gradient descent method batch = 20 ##############################
+#mini batch gradient descent method batch = 10 ##############################
+# Create DataLoader object
+print("creating DataLoader object")
+dataset = Data()
+trainloader = DataLoader(dataset = dataset, batch_size = 10)
+w = torch.tensor(-15.0, requires_grad = True) 
+b = torch.tensor(-10.0, requires_grad = True)
+
+LOSS_MINI10 = []
+lr = 0.1
+print("defining train_model_Mini10 function")
+def train_model_Mini10(epochs):
+    print("running train model Mini20 with ",epochs," iterations") 
+    for epoch in range(epochs):
+        Yhat = forward(X)
+        get_surface.set_para_loss(w.data.tolist(), b.data.tolist(), criterion(Yhat, Y).tolist())
+        get_surface.plot_ps()
+        LOSS_MINI10.append(criterion(forward(X),Y).tolist())
+        for x, y in trainloader:
+            yhat = forward(x)
+            loss = criterion(yhat, y)
+            get_surface.set_para_loss(w.data.tolist(), b.data.tolist(), loss.tolist())
+            loss.backward()
+            w.data = w.data - lr * w.grad.data
+            b.data = b.data - lr * b.grad.data
+            w.grad.data.zero_()
+            b.grad.data.zero_()
+            
+# Run train_model_Mini10 with 10 iterations.
+print("calling train_model_Mini10 with 10 iterations")
+train_model_Mini10(10)
+
+
+# BATCH SIZE 20 ########################################################
+
+#mini batch gradient descent method batch = 10 ##############################
 # Create DataLoader object
 print("creating DataLoader object")
 dataset = Data()
@@ -289,18 +325,10 @@ print("calling train_model_Mini20 with 10 iterations")
 train_model_Mini20(10)
 
 
-# BATCH SIZE 20 ########################################################
+# BATCH totals ########################################################
 
 
-# Practice: Plot a graph to show all the LOSS functions
-print("plotting LOSS functions for all methods")
-LOSS_MINI20 = [loss for loss in LOSS_MINI20]
-plt.plot(LOSS_MINI5,label = "Mini-Batch Gradient Descent, Batch size: 5")
-plt.plot(LOSS_MINI20,label = "Mini-Batch Gradient Descent, Batch size: 20") 
-plt.title("LOSS for Mini-Batch Gradient Descent with Batch Size 20")
-plt.xlabel("Iterations")
-plt.ylabel("Cost/ total loss")
-plt.title("LOSS for Mini-Batch Gradient Descent with Batch Size 20")
+# Practice: Plot a graph to show all the LOSS functions 
 plt.legend()
 # Type your code here
 
